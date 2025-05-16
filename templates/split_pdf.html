@@ -144,28 +144,6 @@
         input[type="file"]::file-selector-button:hover {
             background-color: #0056b3;
         }
-        .file-display {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            color: #b0b0b0;
-        }
-        .remove-btn {
-            background-color: #ff3333;
-            color: #e0e0e0;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 0.8em;
-            transition: background-color 0.3s ease;
-        }
-        .remove-btn:hover {
-            background-color: #cc0000;
-        }
         button {
             background-color: #007bff;
             color: #e0e0e0;
@@ -275,10 +253,6 @@
         <p>Split your PDF into two parts by specifying the page number to split at.</p>
         <label for="pdf">Upload PDF:</label>
         <input type="file" id="pdf" accept="application/pdf" required>
-        <div class="file-display" id="fileDisplay" style="display: none;">
-            <span id="fileName"></span>
-            <button type="button" class="remove-btn" id="removeFile" onclick="removeFile()">Remove</button>
-        </div>
         <label for="split_index">Split Index (Page Number):</label>
         <input type="number" id="split_index" min="1" required>
         <button onclick="splitPDF()">Split PDF</button>
@@ -290,36 +264,6 @@
         <p>© 2025 TARS DocShift. All rights reserved.</p>
     </footer>
     <script>
-        function updateFileDisplay() {
-            const fileInput = document.getElementById('pdf');
-            const fileDisplay = document.getElementById('fileDisplay');
-            const fileNameSpan = document.getElementById('fileName');
-
-            if (fileInput.files.length > 0) {
-                fileNameSpan.textContent = fileInput.files[0].name;
-                fileDisplay.style.display = 'flex';
-            } else {
-                fileDisplay.style.display = 'none';
-            }
-        }
-
-        function removeFile() {
-            const fileInput = document.getElementById('pdf');
-            const splitIndexInput = document.getElementById('split_index');
-            const errorDiv = document.getElementById('error');
-            const successDiv = document.getElementById('success');
-            const downloadLinksDiv = document.getElementById('download-links');
-
-            fileInput.value = '';
-            splitIndexInput.value = '';
-            errorDiv.style.display = 'none';
-            errorDiv.textContent = '';
-            successDiv.style.display = 'none';
-            successDiv.textContent = '';
-            downloadLinksDiv.innerHTML = '';
-            updateFileDisplay();
-        }
-
         async function splitPDF() {
             const pdfInput = document.getElementById('pdf');
             const splitIndexInput = document.getElementById('split_index');
@@ -367,8 +311,6 @@
                 errorDiv.style.display = 'block';
             }
         }
-
-        document.getElementById('pdf').addEventListener('change', updateFileDisplay);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c85a38ddfaaddb',t:'MTc0NjcwMDk2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
