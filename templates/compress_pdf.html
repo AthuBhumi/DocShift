@@ -11,6 +11,9 @@
             color: #e0e0e0;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         nav {
             background-color: #2c2c2c;
@@ -141,20 +144,6 @@
         input[type="file"] {
             display: none;
         }
-        select {
-            padding: 10px;
-            background: #2c2c2c;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            border-radius: 5px;
-            font-size: 1em;
-            margin: 10px;
-            cursor: pointer;
-        }
-        select:focus {
-            outline: none;
-            border-color: #007bff;
-        }
         .file-display {
             display: flex;
             align-items: center;
@@ -177,6 +166,21 @@
         .remove-btn:hover {
             background-color: #cc0000;
         }
+        select {
+            padding: 10px;
+            background: #2c2c2c;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-size: 1em;
+            margin: 10px;
+            cursor: pointer;
+            width: 200px;
+        }
+        select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
         button {
             padding: 10px 20px;
             background-color: #007bff;
@@ -193,6 +197,13 @@
         #statusMessage {
             margin-top: 20px;
             font-weight: bold;
+        }
+        footer {
+            background-color: #2c2c2c;
+            padding: 20px;
+            text-align: center;
+            margin-top: auto;
+            color: #b0b0b0;
         }
         @media (max-width: 768px) {
             nav {
@@ -278,107 +289,108 @@
                 <option value="high">High Compression</option>
             </select>
             <br>
-            <button type="button" onclick="compressPDF()">Compress PDF</button>
+            <button type="button" id="compressButton">Compress PDF</button>
         </form>
         <div id="statusMessage"></div>
     </div>
-
+    <footer>
+        <p>© 2025 TARS DocShift. All rights reserved.</p>
+    </footer>
     <script>
-        function setStatus(message, isError = false) {
-            const status = document.getElementById('statusMessage');
-            if (!status) {
-                console.error('Status message element not found.');
-                return;
-            }
-            status.textContent = message;
-            status.style.color = isError ? 'red' : '#28a745';
-        }
-
-        function updateFileDisplay() {
-            const fileInput = document.getElementById('pdf');
-            const fileDisplay = document.getElementById('fileDisplay');
-            const fileNameSpan = document.getElementById('fileName');
-
-            if (!fileInput || !fileDisplay || !fileNameSpan) {
-                console.error('Required DOM elements not found.');
-                return;
+        document.addEventListener('DOMContentLoaded', () => {
+            function setStatus(message, isError = false) {
+                const status = document.getElementById('statusMessage');
+                if (!status) return;
+                status.textContent = message;
+                status.style.color = isError ? 'red' : '#28a745';
             }
 
-            if (fileInput.files.length > 0) {
-                fileNameSpan.textContent = fileInput.files[0].name;
-                fileDisplay.style.display = 'flex';
-            } else {
-                fileNameSpan.textContent = '';
-                fileDisplay.style.display = 'none';
-            }
-        }
+            function updateFileDisplay() {
+                const fileInput = document.getElementById('pdf');
+                const fileDisplay = document.getElementById('fileDisplay');
+                const fileNameSpan = document.getElementById('fileName');
 
-        function removeFile() {
-            console.log('removeFile called');
-            const fileInput = document.getElementById('pdf');
-            const compressionLevel = document.getElementById('compression_level');
+                if (!fileInput || !fileDisplay || !fileNameSpan) return;
 
-            if (!fileInput || !compressionLevel) {
-                console.error('Required DOM elements not found.');
-                return;
-            }
-
-            fileInput.value = ''; // Clear the file input
-            compressionLevel.value = 'low'; // Reset compression level to default
-            setStatus(''); // Clear the status message
-            updateFileDisplay(); // Update the UI
-        }
-
-        function compressPDF() {
-            console.log('compressPDF called');
-            const form = document.getElementById('compressPdfForm');
-            const formData = new FormData(form);
-
-            fetch('/compress', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text); });
+                if (fileInput.files.length > 0) {
+                    const fileNames = Array.from(fileInput.files).map(file => file.name).join(', ');
+                    fileNameSpan.textContent = fileNames;
+                    fileDisplay.style.display = 'flex';
+                } else {
+                    fileNameSpan.textContent = '';
+                    fileDisplay.style.display = 'none';
                 }
-                return response.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'compressed.pdf';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                setStatus('Compression successful! File downloaded.');
-            })
-            .catch(err => setStatus('Compression failed: ' + err.message, true));
-        }
+            }
 
-        // Initialize event listeners after DOM is fully loaded
-        const fileInput = document.getElementById('pdf');
-        const removeButton = document.getElementById('removeFile');
-
-        if (fileInput) {
-            fileInput.addEventListener('change', () => {
-                console.log('File input changed');
+            function removeFile() {
+                const fileInput = document.getElementById('pdf');
+                if (!fileInput) return;
+                fileInput.value = '';
+                setStatus('');
                 updateFileDisplay();
-            });
-        } else {
-            console.error('File input element not found.');
-        }
+            }
 
-        if (removeButton) {
-            removeButton.addEventListener('click', () => {
-                console.log('Remove button clicked');
-                removeFile();
-            });
-        } else {
-            console.error('Remove button element not found.');
-        }
+            function compressPDF() {
+                const fileInput = document.getElementById('pdf');
+                const compressButton = document.getElementById('compressButton');
+
+                if (!fileInput.files.length) {
+                    setStatus('Please select a PDF file.', true);
+                    return;
+                }
+
+                const form = document.getElementById('compressPdfForm');
+                const formData = new FormData(form);
+
+                compressButton.disabled = true;
+                setStatus('Compressing...', false);
+
+                fetch('/compress', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text || 'Compression failed.'); });
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'compressed.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    setStatus('Compression successful! File downloaded.');
+                    removeFile();
+                })
+                .catch(err => {
+                    setStatus('Compression failed: ' + err.message, true);
+                })
+                .finally(() => {
+                    compressButton.disabled = false;
+                });
+            }
+
+            const fileInput = document.getElementById('pdf');
+            const removeButton = document.getElementById('removeFile');
+            const compressButton = document.getElementById('compressButton');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', updateFileDisplay);
+            }
+
+            if (removeButton) {
+                removeButton.addEventListener('click', removeFile);
+            }
+
+            if (compressButton) {
+                compressButton.addEventListener('click', compressPDF);
+            }
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c85a38aa5bbfae',t:'MTc0NjcwMDk2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
