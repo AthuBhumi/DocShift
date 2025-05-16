@@ -5,13 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Background Remover - TARS DocShift</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 0;
+        * {
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e2f;
+            color: #f1f1f1;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
         nav {
             background-color: #2c2c2c;
             padding: 15px 20px;
@@ -19,18 +27,27 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
         }
+
         .nav-logo {
             font-size: 1.5em;
             font-weight: bold;
         }
+
         .nav-logo a {
-            color: #e0e0e0;
+            color: #f1f1f1;
             text-decoration: none;
         }
+
         .nav-logo a:hover {
-            color: #007bff;
+            color: #70a1ff;
         }
+
         nav ul {
             list-style: none;
             margin: 0;
@@ -38,36 +55,46 @@
             display: flex;
             gap: 20px;
         }
+
         nav ul li {
             position: relative;
             display: inline;
         }
+
         nav ul li a {
-            color: #e0e0e0;
+            color: #f1f1f1;
             text-decoration: none;
             font-weight: bold;
         }
+
         nav ul li a:hover {
-            color: #007bff;
+            color: #70a1ff;
         }
+
         .dropdown {
             position: relative;
         }
+
         .dropdown-toggle {
             display: flex;
             align-items: center;
             gap: 5px;
             cursor: pointer;
+            color: #f1f1f1;
+            font-weight: bold;
         }
+
         .dropdown-toggle::after {
             content: '▼';
             font-size: 0.8em;
-            color: #e0e0e0;
+            color: #f1f1f1;
             transition: transform 0.3s ease;
         }
+
         .dropdown:hover .dropdown-toggle::after {
             transform: rotate(180deg);
         }
+
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -80,79 +107,88 @@
             min-width: 200px;
             z-index: 1000;
         }
+
         .dropdown:hover .dropdown-menu {
             display: block;
         }
+
         .dropdown-menu li {
             display: block;
             padding: 10px 20px;
         }
+
         .dropdown-menu li a {
-            color: #e0e0e0;
+            color: #f1f1f1;
             font-weight: normal;
             display: block;
         }
+
         .dropdown-menu li a:hover {
-            color: #007bff;
+            color: #70a1ff;
             background-color: #2c2c2c;
         }
+
         .container {
-            max-width: 1200px;
-            margin: 50px auto;
-            background: linear-gradient(135deg, #2c2c2c, #343434);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            background-color: #2b2b3c;
+            padding: 30px 25px;
+            max-width: 450px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
             text-align: center;
-            transition: all 0.3s ease;
+            margin: 60px auto 0; /* Adjusted margin to account for fixed nav */
         }
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-        }
+
         h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #ffffff;
         }
-        .custom-file-upload {
-            display: inline-block;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #2c2c2c, #343434);
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: #e0e0e0;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
+
+        .upload-section {
+            margin: 20px 0;
         }
-        .custom-file-upload:hover {
-            background: linear-gradient(135deg, #343434, #3a3a3a);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            color: #007bff;
-        }
-        .custom-file-upload:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
+
         input[type="file"] {
-            display: none;
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+            font-size: 15px;
+            color: #ccc;
+            background-color: #3a3a4d;
+            border: 1px solid #555;
+            padding: 10px;
+            border-radius: 5px;
         }
+
+        input[type="file"]::file-selector-button {
+            background-color: #444a61;
+            border: none;
+            padding: 8px 14px;
+            color: #f1f1f1;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+            transition: background 0.3s ease;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background-color: #59607a;
+        }
+
         .file-display {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin: 10px 0;
             font-size: 0.9em;
-            color: #b0b0b0;
+            color: #ccc;
         }
+
         .remove-btn {
-            background-color: #ff3333;
-            color: #e0e0e0;
+            background-color: #ff4757;
+            color: #fff;
             border: none;
             border-radius: 5px;
             padding: 5px 10px;
@@ -160,66 +196,102 @@
             font-size: 0.8em;
             transition: background-color 0.3s ease;
         }
+
         .remove-btn:hover {
-            background-color: #cc0000;
+            background-color: #e84150;
         }
+
         button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
+            background-color: #ff4757;
+            color: #fff;
+            padding: 12px 20px;
+            font-size: 16px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s;
-            margin: 10px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
         }
+
         button:hover {
-            background-color: #0056b3;
+            background-color: #e84150;
         }
-        #statusMessage {
+
+        .error {
+            color: #ff6b81;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: #2ed573;
+            margin-top: 10px;
+        }
+
+        a.back {
+            display: inline-block;
             margin-top: 20px;
-            font-weight: bold;
+            color: #70a1ff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
         }
+
+        a.back:hover {
+            color: #a4caff;
+        }
+
         #previewImage {
             max-width: 100%;
             margin-top: 20px;
-            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAGUlEQVR4nGJ+/v7/AQMEALbZ5fLFi6fOLgD71x8nW4pH5QAAAABJRU5ErkJggg==') repeat;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAI AACQkWg2AAAAGUlEQVR4nGJ+/v7/AQMEALbZ5fLFi6fOLgD71x8nW4pH5QAAAABJRU5ErkJggg==') repeat;
         }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #2c2c2c;
+            color: #f1f1f1;
+            width: 100%;
+            margin-top: auto;
+        }
+
         @media (max-width: 768px) {
             nav {
                 flex-direction: column;
                 align-items: flex-start;
                 padding: 10px 20px;
             }
+
             .nav-logo {
                 margin-bottom: 10px;
             }
+
             nav ul {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
+
             nav ul li {
                 display: block;
                 width: 100%;
             }
+
             .dropdown-menu {
                 position: static;
                 width: 100%;
                 box-shadow: none;
                 background-color: #2c2c2c;
             }
+
             .dropdown-menu li {
                 padding: 10px;
             }
+
             .container {
-                margin: 20px;
                 padding: 20px;
-            }
-            .custom-file-upload {
-                padding: 10px 20px;
-                font-size: 0.9em;
+                margin-top: 120px; /* Adjusted for mobile nav height */
             }
         }
     </style>
@@ -253,24 +325,28 @@
     <div class="container">
         <h1>Background Remover</h1>
         <form id="bgRemoverForm" enctype="multipart/form-data">
-            <label for="image" class="custom-file-upload">Choose Image (JPG, PNG, GIF, BMP, TIFF, WEBP)</label>
-            <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.gif,.bmp,.tiff,.tif,.webp">
+            <div class="upload-section">
+                <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.gif,.bmp,.tiff,.tif,.webp">
+            </div>
             <div class="file-display" id="fileDisplay" style="display: none;">
                 <span id="fileName"></span>
                 <button type="button" class="remove-btn" id="removeFile">Remove</button>
             </div>
-            <br>
             <button type="button" id="removeBgButton" onclick="removeBackground()">Remove Background</button>
         </form>
         <img id="previewImage" src="" alt="" style="display: none;">
         <div id="statusMessage"></div>
+        <a href="/" class="back">← Back to Home</a>
     </div>
+    <footer>
+        © 2025 TARS DocShift. All rights reserved.
+    </footer>
     <script>
         function setStatus(message, isError = false) {
             const status = document.getElementById('statusMessage');
             if (!status) return;
             status.textContent = message;
-            status.style.color = isError ? 'red' : '#28a745';
+            status.className = isError ? 'error' : 'success';
         }
 
         function updateFileDisplay() {
