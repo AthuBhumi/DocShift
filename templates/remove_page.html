@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remove Pages from PDF - TARS DocShift</title>
+    <title>Remove Pages - TARS DocShift</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -100,7 +100,7 @@
             background-color: #2c2c2c;
         }
         .container {
-            max-width: 600px;
+            max-width: 1200px;
             margin: 50px auto;
             background: linear-gradient(135deg, #2c2c2c, #343434);
             padding: 40px;
@@ -117,32 +117,43 @@
             font-size: 2em;
             margin-bottom: 20px;
         }
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
+        p {
+            font-size: 1em;
+            color: #b0b0b0;
+            margin-bottom: 30px;
         }
-        input[type="file"],
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
+        .form-group {
             margin-bottom: 20px;
-            background-color: #343434;
-            border: 1px solid #555;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2c2c2c, #343434);
+            border: 1px solid #444;
             border-radius: 5px;
             color: #e0e0e0;
             font-size: 1em;
-        }
-        input[type="file"]::file-selector-button {
-            background-color: #007bff;
-            color: #e0e0e0;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
-        input[type="file"]::file-selector-button:hover {
-            background-color: #0056b3;
+        .custom-file-upload:hover {
+            background: linear-gradient(135deg, #343434, #3a3a3a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            color: #007bff;
+        }
+        .custom-file-upload:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        input[type="file"] {
+            display: none;
         }
         .file-display {
             display: flex;
@@ -166,40 +177,37 @@
         .remove-btn:hover {
             background-color: #cc0000;
         }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #343434;
+            color: #e0e0e0;
+            width: 100%;
+            max-width: 400px;
+        }
         button {
+            padding: 10px 20px;
+            font-size: 1em;
             background-color: #007bff;
             color: #e0e0e0;
-            padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1em;
             transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #0056b3;
         }
-        #error, #success {
+        #pageCount {
+            margin: 20px 0;
+            font-size: 1em;
+            color: #e0e0e0;
+        }
+        #statusMessage {
             margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-        #error {
-            background-color: #ff3333;
-        }
-        #success {
-            background-color: #28a745;
-        }
-        #download-link {
-            margin-top: 20px;
-        }
-        #download-link a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        #download-link a:hover {
-            text-decoration: underline;
+            font-weight: bold;
         }
         footer {
             background-color: #2c2c2c;
@@ -240,6 +248,15 @@
                 margin: 20px;
                 padding: 20px;
             }
+            .form-group {
+                gap: 5px;
+            }
+            .custom-file-upload,
+            input[type="text"],
+            button {
+                width: 100%;
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -271,122 +288,169 @@
     </nav>
     <div class="container">
         <h1>Remove Pages from PDF</h1>
-        <p>Upload your PDF and specify the pages to remove (e.g., "1,3-5").</p>
-        <label for="pdf">Upload PDF:</label>
-        <input type="file" id="pdf" accept="application/pdf" required>
-        <div class="file-display" id="fileDisplay" style="display: none;">
-            <span id="fileName"></span>
-            <button type="button" class="remove-btn" id="removeFile" onclick="removeFile()">Remove</button>
-        </div>
-        <div id="page-count"></div>
-        <label for="pages">Pages to Remove:</label>
-        <input type="text" id="pages" placeholder="e.g., 1,3-5" required>
-        <button onclick="removePages()">Remove Pages</button>
-        <div id="error"></div>
-        <div id="success"></div>
-        <div id="download-link"></div>
+        <p>Upload a PDF file, check the total pages, and specify the pages to remove.</p>
+        <form id="removePagesForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="pdf" class="custom-file-upload">Choose PDF</label>
+                <input type="file" id="pdf" name="pdf" accept=".pdf" required>
+                <div class="file-display" id="fileDisplay" style="display: none;">
+                    <span id="fileName"></span>
+                    <button type="button" class="remove-btn" id="removeFile">Remove</button>
+                </div>
+                <button type="button" id="checkPageCountButton">Check Page Count</button>
+            </div>
+            <div id="pageCount"></div>
+            <div class="form-group">
+                <input type="text" id="removedPages" name="removed_pages" placeholder="Pages to remove (e.g., 1,3,5)">
+                <button type="button" id="removePagesButton">Remove Pages</button>
+            </div>
+        </form>
+        <div id="statusMessage"></div>
     </div>
     <footer>
         <p>© 2025 TARS DocShift. All rights reserved.</p>
     </footer>
     <script>
-        async function getPageCount(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            return pdf.numPages;
-        }
-
-        async function updatePageCount() {
-            const fileInput = document.getElementById('pdf');
-            const pageCountDiv = document.getElementById('page-count');
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const pageCount = await getPageCount(file);
-                pageCountDiv.textContent = `Total Pages: ${pageCount}`;
-            } else {
-                pageCountDiv.textContent = '';
-            }
-        }
-
-        function updateFileDisplay() {
-            const fileInput = document.getElementById('pdf');
-            const fileDisplay = document.getElementById('fileDisplay');
-            const fileNameSpan = document.getElementById('fileName');
-
-            if (fileInput.files.length > 0) {
-                fileNameSpan.textContent = fileInput.files[0].name;
-                fileDisplay.style.display = 'flex';
-                updatePageCount();
-            } else {
-                fileDisplay.style.display = 'none';
-            }
-        }
-
-        function removeFile() {
-            const fileInput = document.getElementById('pdf');
-            const pagesInput = document.getElementById('pages');
-            const pageCountDiv = document.getElementById('page-count');
-            const errorDiv = document.getElementById('error');
-            const successDiv = document.getElementById('success');
-            const downloadLinkDiv = document.getElementById('download-link');
-
-            fileInput.value = '';
-            pagesInput.value = '';
-            pageCountDiv.textContent = '';
-            errorDiv.style.display = 'none';
-            errorDiv.textContent = '';
-            successDiv.style.display = 'none';
-            successDiv.textContent = '';
-            downloadLinkDiv.innerHTML = '';
-            updateFileDisplay();
-        }
-
-        async function removePages() {
-            const pdfInput = document.getElementById('pdf');
-            const pagesInput = document.getElementById('pages');
-            const errorDiv = document.getElementById('error');
-            const successDiv = document.getElementById('success');
-            const downloadLinkDiv = document.getElementById('download-link');
-
-            errorDiv.style.display = 'none';
-            errorDiv.textContent = '';
-            successDiv.style.display = 'none';
-            successDiv.textContent = '';
-            downloadLinkDiv.innerHTML = '';
-
-            if (!pdfInput.files[0] || !pagesInput.value) {
-                errorDiv.textContent = 'Please upload a PDF and specify pages to remove.';
-                errorDiv.style.display = 'block';
-                return;
+        document.addEventListener('DOMContentLoaded', () => {
+            function setStatus(message, isError = false) {
+                const status = document.getElementById('statusMessage');
+                if (!status) return;
+                status.textContent = message;
+                status.style.color = isError ? 'red' : '#28a745';
             }
 
-            const formData = new FormData();
-            formData.append('pdf', pdfInput.files[0]);
-            formData.append('pages', pagesInput.value);
+            function updateFileDisplay() {
+                const fileInput = document.getElementById('pdf');
+                const fileDisplay = document.getElementById('fileDisplay');
+                const fileNameSpan = document.getElementById('fileName');
 
-            try {
-                const response = await fetch('/remove-pages', {
-                    method: 'POST',
-                    body: formData
-                });
+                if (!fileInput || !fileDisplay || !fileNameSpan) return;
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText);
+                if (fileInput.files.length > 0) {
+                    const fileNames = Array.from(fileInput.files).map(file => file.name).join(', ');
+                    fileNameSpan.textContent = fileNames;
+                    fileDisplay.style.display = 'flex';
+                } else {
+                    fileNameSpan.textContent = '';
+                    fileDisplay.style.display = 'none';
+                }
+            }
+
+            function removeFile() {
+                const fileInput = document.getElementById('pdf');
+                if (!fileInput) return;
+                fileInput.value = '';
+                document.getElementById('pageCount').textContent = '';
+                setStatus('');
+                updateFileDisplay();
+            }
+
+            async function getPageCount() {
+                const fileInput = document.getElementById('pdf');
+                const checkButton = document.getElementById('checkPageCountButton');
+
+                if (!fileInput.files.length) {
+                    setStatus('Please select a PDF file.', true);
+                    return;
                 }
 
-                const result = await response.json();
-                successDiv.textContent = 'Pages removed successfully!';
-                successDiv.style.display = 'block';
-                downloadLinkDiv.innerHTML = `<a href="${result.download_url}" download>Download Modified PDF</a>`;
-            } catch (error) {
-                errorDiv.textContent = error.message;
-                errorDiv.style.display = 'block';
-            }
-        }
+                const form = document.getElementById('removePagesForm');
+                const formData = new FormData(form);
 
-        document.getElementById('pdf').addEventListener('change', updateFileDisplay);
+                checkButton.disabled = true;
+                setStatus('Fetching page count...', false);
+
+                try {
+                    const response = await fetch('/get-page-count', { method: 'POST', body: formData });
+                    const result = await response.json();
+                    if (result.page_count) {
+                        document.getElementById('pageCount').textContent = `Total Pages: ${result.page_count}`;
+                        setStatus('Page count retrieved successfully.', false);
+                    } else {
+                        throw new Error(result.error || 'Failed to get page count');
+                    }
+                } catch (err) {
+                    setStatus('Error: ' + err.message, true);
+                } finally {
+                    checkButton.disabled = false;
+                }
+            }
+
+            async function removePages() {
+                const fileInput = document.getElementById('pdf');
+                const removeButton = document.getElementById('removePagesButton');
+                const pageCountText = document.getElementById('pageCount').textContent;
+
+                if (!fileInput.files.length) {
+                    setStatus('Please select a PDF file.', true);
+                    return;
+                }
+
+                if (!pageCountText) {
+                    setStatus('Please check the page count first.', true);
+                    return;
+                }
+
+                const pageCount = pageCountText.match(/\d+/) ? pageCountText.match(/\d+/)[0] : 0;
+                const removedPages = document.getElementById('removedPages').value.trim();
+                if (!removedPages) {
+                    setStatus('Please specify pages to remove.', true);
+                    return;
+                }
+
+                const form = document.getElementById('removePagesForm');
+                const formData = new FormData(form);
+                formData.append('page_count', pageCount);
+
+                removeButton.disabled = true;
+                setStatus('Processing...', false);
+
+                try {
+                    const response = await fetch('/remove-pages', { method: 'POST', body: formData });
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'removed_pages.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                        setStatus('Pages removed successfully! File downloaded.', false);
+                        removeFile();
+                    } else {
+                        const result = await response.json();
+                        throw new Error(result.error || 'Failed to remove pages');
+                    }
+                } catch (err) {
+                    setStatus('Error: ' + err.message, true);
+                } finally {
+                    removeButton.disabled = false;
+                }
+            }
+
+            const fileInput = document.getElementById('pdf');
+            const removeButton = document.getElementById('removeFile');
+            const checkPageCountButton = document.getElementById('checkPageCountButton');
+            const removePagesButton = document.getElementById('removePagesButton');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', updateFileDisplay);
+            }
+
+            if (removeButton) {
+                removeButton.addEventListener('click', removeFile);
+            }
+
+            if (checkPageCountButton) {
+                checkPageCountButton.addEventListener('click', getPageCount);
+            }
+
+            if (removePagesButton) {
+                removePagesButton.addEventListener('click', removePages);
+            }
+        });
     </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c85a38aa5bbfae',t:'MTc0NjcwMDk2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
